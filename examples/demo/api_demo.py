@@ -159,6 +159,7 @@ def create_app(args, model, tokenizer):
 
             print("start generation")
             if request.stream:
+                  print("Entro al stream")
                   def event_stream():
                         response_text = ""
                         with generation_lock:
@@ -188,12 +189,16 @@ def create_app(args, model, tokenizer):
                               yield _format_sse("result", payload).encode("utf-8")
 
                         return StreamingResponse(event_stream(), media_type="text/event-stream")
-
+                  
+            print("Despues de la condicion stream")
             with generation_lock:
                   response_text = ""
+                  print("Iniciar los tokens")
                   for token in _chat_stream(model, tokenizer, prompt, history_pairs):
+                        print(token)
                         response_text += token
 
+            print("end generation")
             history_pairs.append((prompt, response_text))
             return ChatResponse(
                   response=response_text,
@@ -202,7 +207,6 @@ def create_app(args, model, tokenizer):
                         for user, assistant in history_pairs
                   ],
             )
-
       return app
 
 
